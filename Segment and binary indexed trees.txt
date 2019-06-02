@@ -1,0 +1,650 @@
+//Segment tree min query
+// Java Program to show segment tree operations like construction,
+// query and update
+import java.util.*;
+ 
+// Java Program to show segment tree operations like construction,
+// query and update
+class SegmentTree  
+{
+    int st[]; // The array that stores segment tree nodes
+ 
+    /* Constructor to construct segment tree from given array. This
+       constructor  allocates memory for segment tree and calls
+       constructSTUtil() to  fill the allocated memory */
+    SegmentTree(int arr[], int n)
+    {
+        // Allocate memory for segment tree
+        //Height of segment tree
+        int x = (int) (Math.ceil(Math.log(n) / Math.log(2)));
+ 
+        //Maximum size of segment tree
+        int max_size = 2 * (int) Math.pow(2, x) - 1;
+ 
+        st = new int[max_size]; // Memory allocation
+ 
+        constructSTUtil(arr, 0, n - 1, 0);
+    }
+ 
+    // A utility function to get the middle index from corner indexes.
+    int getMid(int s, int e) {
+        return s + (e - s) / 2;
+    }
+ 
+    /*  A recursive function to get the sum of values in given range
+        of the array.  The following are parameters for this function.
+ 
+      st    --> Pointer to segment tree
+      si    --> Index of current node in the segment tree. Initially
+                0 is passed as root is always at index 0
+      ss & se  --> Starting and ending indexes of the segment represented
+                    by current node, i.e., st[si]
+      qs & qe  --> Starting and ending indexes of query range */
+    int getSumUtil(int ss, int se, int qs, int qe, int si)
+    {
+        // If segment of this node is a part of given range, then return
+        // the sum of the segment
+        if (qs <= ss && qe >= se)
+            return st[si];
+ 
+        // If segment of this node is outside the given range
+        if (se < qs || ss > qe)
+            return 0;
+ 
+        // If a part of this segment overlaps with the given range
+        int mid = getMid(ss, se);
+        return getSumUtil(ss, mid, qs, qe, 2 * si + 1) +
+                getSumUtil(mid + 1, se, qs, qe, 2 * si + 2);
+    }
+ 
+    /* A recursive function to update the nodes which have the given  
+       index in their range. The following are parameters
+        st, si, ss and se are same as getSumUtil()
+        i    --> index of the element to be updated. This index is in
+                 input array.
+       diff --> Value to be added to all nodes which have i in range */
+    void updateValueUtil(int ss, int se, int i, int diff, int si)
+    {
+        // Base Case: If the input index lies outside the range of  
+        // this segment
+        if (i < ss || i > se)
+            return;
+ 
+        // If the input index is in range of this node, then update the
+        // value of the node and its children
+        st[si] = st[si] + diff;
+        if (se != ss) {
+            int mid = getMid(ss, se);
+            updateValueUtil(ss, mid, i, diff, 2 * si + 1);
+            updateValueUtil(mid + 1, se, i, diff, 2 * si + 2);
+        }
+    }
+ 
+    // The function to update a value in input array and segment tree.
+   // It uses updateValueUtil() to update the value in segment tree
+    void updateValue(int arr[], int n, int i, int new_val)
+    {
+        // Check for erroneous input index
+        if (i < 0 || i > n - 1) {
+            System.out.println("Invalid Input");
+            return;
+        }
+ 
+        // Get the difference between new value and old value
+        int diff = new_val - arr[i];
+ 
+        // Update the value in array
+        arr[i] = new_val;
+ 
+        // Update the values of nodes in segment tree
+        updateValueUtil(0, n - 1, i, diff, 0);
+    }
+ 
+    // Return sum of elements in range from index qs (quey start) to
+   // qe (query end).  It mainly uses getSumUtil()
+    int getSum(int n, int qs, int qe)
+    {
+        // Check for erroneous input values
+        if (qs < 0 || qe > n - 1 || qs > qe) {
+            System.out.println("Invalid Input");
+            return -1;
+        }
+        return getSumUtil(0, n - 1, qs, qe, 0);
+    }
+ 
+    // A recursive function that constructs Segment Tree for array[ss..se].
+    // si is index of current node in segment tree st
+    int constructSTUtil(int arr[], int ss, int se, int si)
+    {
+        // If there is one element in array, store it in current node of
+        // segment tree and return
+        if (ss == se) {
+            st[si] = arr[ss];
+            return arr[ss];
+        }
+ 
+        // If there are more than one elements, then recur for left and
+        // right subtrees and store the sum of values in this node
+        int mid = getMid(ss, se);
+        st[si] = constructSTUtil(arr, ss, mid, si * 2 + 1) +
+                 constructSTUtil(arr, mid + 1, se, si * 2 + 2);
+        return st[si];
+    }
+ 
+    // Driver program to test above functions
+    public static void main(String args[])
+    {
+        int arr[] = {1, 3, 5, 7, 9, 11};
+        int n = arr.length;
+        SegmentTree  tree = new SegmentTree(arr, n);
+ 
+        // Build segment tree from given array
+ 
+        // Print sum of values in array from index 1 to 3
+        System.out.println("Sum of values in given range = " +
+                           tree.getSum(n, 1, 3));
+ 
+        // Update: set arr[1] = 10 and update corresponding segment
+        // tree nodes
+        tree.updateValue(arr, n, 1, 10);
+ 
+        // Find sum after the value is updated
+        System.out.println("Updated sum of values in given range = " +
+                tree.getSum(n, 1, 3));
+    }
+}
+//Segment tree with node example
+class Node{
+    int firstMax;
+    int secondMax;
+}
+class SegmentTree
+{
+    Node st[]; // The array that stores segment tree nodes
+ 
+    /* Constructor to construct segment tree from given array. This
+       constructor  allocates memory for segment tree and calls
+       constructSTUtil() to  fill the allocated memory */
+    SegmentTree(int arr[], int n)
+    {
+        // Allocate memory for segment tree
+        //Height of segment tree
+        int x = (int) (Math.ceil(Math.log(n) / Math.log(2)));
+ 
+        //Maximum size of segment tree
+        int max_size = 2 * (int) Math.pow(2, x) - 1;
+ 
+        st = new Node[max_size]; // Memory allocation
+        for (int i = 0; i < max_size; i++) {
+            st[i]=new Node();
+        }
+        constructSTUtil(arr, 0, n - 1, 0);
+    }
+ 
+    // A utility function to get the middle index from corner indexes.
+    int getMid(int s, int e) {
+        return s + (e - s) / 2;
+    }
+ 
+    /*  A recursive function to get the sum of values in given range
+        of the array.  The following are parameters for this function.
+ 
+      st    --> Pointer to segment tree
+      si    --> Index of current node in the segment tree. Initially
+                0 is passed as root is always at index 0
+      ss & se  --> Starting and ending indexes of the segment represented
+                    by current node, i.e., st[si]
+      qs & qe  --> Starting and ending indexes of query range */
+ 
+    Node getMaxUtil(int ss, int se, int qs, int qe, int si)
+    {
+        Node maxSum=new Node();
+        // If segment of this node is a part of given range, then return
+        // the min of the segment
+        if (se < qs || ss > qe)
+            return maxSum;
+ 
+        if (qs <= ss && qe >= se) {
+            return st[si];
+        }
+ 
+        // If segment of this node is outside the given range
+ 
+ 
+        // If a part of this segment overlaps with the given range
+        int mid = getMid(ss, se);
+ 
+        Node left = getMaxUtil(ss, mid, qs,qe, 2 * si + 1);
+        Node right = getMaxUtil(mid + 1, se, qs,qe, 2 * si + 2);
+        maxSum.firstMax=Math.max(left.firstMax,right.firstMax);
+        maxSum.secondMax=Math.min(Math.max(left.firstMax,right.secondMax),Math.max(right.firstMax,left.secondMax));
+        return maxSum;
+    }
+ 
+    /* A recursive function to update the nodes which have the given  
+       index in their range. The following are parameters
+        st, si, ss and se are same as getSumUtil()
+        i    --> index of the element to be updated. This index is in
+                 input array.
+       diff --> Value to be added to all nodes which have i in range */
+    Node updateValueUtil(int ss, int se, int i, int new_val, int si)
+    {
+        // Base Case: If the input index lies outside the range of  
+        // this segment
+        if (i < ss || i > se)
+            return st[si];
+ 
+        if(se==ss) {
+            st[si].firstMax = new_val;
+            return st[si];
+        }
+        // If the input index is in range of this node, then update the
+        // value of the node and its children
+ 
+            int mid = getMid(ss, se);
+            Node left = updateValueUtil(ss, mid, i, new_val, 2 * si + 1);
+            Node right = updateValueUtil(mid + 1, se, i, new_val, 2 * si + 2);
+            st[si].firstMax=Math.max(left.firstMax,right.firstMax);
+            st[si].secondMax=Math.min(Math.max(left.firstMax,right.secondMax),Math.max(right.firstMax,left.secondMax));
+ 
+        return st[si];
+    }
+ 
+    // The function to update a value in input array and segment tree.
+    // It uses updateValueUtil() to update the value in segment tree
+    void updateValue(int arr[], int n, int i, int new_val)
+    {
+        // Check for erroneous input index
+        if (i < 0 || i > n - 1) {
+            System.out.println("Invalid Input");
+            return;
+        }
+ 
+        // Update the value in array
+        arr[i] = new_val;
+ 
+        // Update the values of nodes in segment tree
+        updateValueUtil(0, n - 1, i, new_val, 0);
+    }
+ 
+    // Return sum of elements in range from index qs (quey start) to
+    // qe (query end).  It mainly uses getSumUtil()
+    int getSum(int n, int qs, int qe)
+    {
+        // Check for erroneous input values
+        if (qs < 0 || qe > n - 1 || qs > qe) {
+            System.out.println("Invalid Input");
+            return -1;
+        }
+        Node endNode= getMaxUtil(0, n - 1, qs, qe, 0);
+        return endNode.firstMax+endNode.secondMax;
+    }
+ 
+    // A recursive function that constructs Segment Tree for array[ss..se].
+    // si is index of current node in segment tree st
+    Node constructSTUtil(int arr[], int ss, int se, int si)
+    {
+        // If there is one element in array, store it in current node of
+        // segment tree and return
+        if (ss == se) {
+            st[si].firstMax=arr[ss];
+            return st[si];
+        }
+        else {
+            // If there are more than one elements, then recur for left and
+            // right subtrees and store the sum of values in this node
+            int mid = getMid(ss, se);
+            Node left = constructSTUtil(arr, ss, mid, 2 * si + 1);
+            Node right = constructSTUtil(arr, mid + 1, se, 2 * si + 2);
+            st[si].firstMax = Math.max(left.firstMax, right.firstMax);
+            st[si].secondMax=Math.min(Math.max(left.firstMax,right.secondMax),Math.max(right.firstMax,left.secondMax));
+            return st[si];
+        }
+    }
+ 
+    // Driver program to test above functions
+    public static void main(String args[])
+    {
+        int arr[] = {1, 2, 3, 4, 5};
+        int n = arr.length;
+        SegmentTree  tree = new SegmentTree(arr, n);
+ 
+        // Build segment tree from given array
+ 
+        // Print sum of values in array from index 1 to 3
+        System.out.println("Max of values in given range = " +
+                tree.getSum(n, 1, 3));
+        System.out.println("Max of values in given range = " +
+                tree.getSum(n, 1, 4));
+        // Update: set arr[1] = 10 and update corresponding segment
+        // tree nodes
+        tree.updateValue(arr, n, 0, 6);
+        System.out.println("Max of values in given range = " +
+                tree.getSum(n, 0, 4));
+        // Find sum after the value is updated
+        tree.updateValue(arr, n,0, 7);
+        System.out.println("Max of values in given range = " +
+                tree.getSum(n, 0, 4));
+    }
+}
+ 
+// SEGMENT TREE VALID EXPRESSIONS
+class Node{
+    int open;
+    int closed;
+    int max;
+}
+class SegmentTree
+{
+    Node st[]; // The array that stores segment tree nodes
+ 
+    /* Constructor to construct segment tree from given array. This
+       constructor  allocates memory for segment tree and calls
+       constructSTUtil() to  fill the allocated memory */
+    SegmentTree(int arr[], int n)
+    {
+        // Allocate memory for segment tree
+        //Height of segment tree
+        int x = (int) (Math.ceil(Math.log(n) / Math.log(2)));
+ 
+        //Maximum size of segment tree
+        int max_size = 2 * (int) Math.pow(2, x) - 1;
+ 
+        st = new Node[max_size]; // Memory allocation
+        for (int i = 0; i < max_size; i++) {
+            st[i]=new Node();
+        }
+        constructSTUtil(arr, 0, n - 1, 0);
+    }
+ 
+    // A utility function to get the middle index from corner indexes.
+    int getMid(int s, int e) {
+        return s + (e - s) / 2;
+    }
+ 
+    /*  A recursive function to get the sum of values in given range
+        of the array.  The following are parameters for this function.
+ 
+      st    --> Pointer to segment tree
+      si    --> Index of current node in the segment tree. Initially
+                0 is passed as root is always at index 0
+      ss & se  --> Starting and ending indexes of the segment represented
+                    by current node, i.e., st[si]
+      qs & qe  --> Starting and ending indexes of query range */
+ 
+    Node getMaxUtil(int ss, int se, int qs, int qe, int si)
+    {
+        Node maxSum=new Node();
+        // If segment of this node is a part of given range, then return
+        // the min of the segment
+        if (se < qs || ss > qe)
+            return maxSum;
+ 
+        if (qs <= ss && qe >= se) {
+            return st[si];
+        }
+ 
+        // If segment of this node is outside the given range
+ 
+ 
+        // If a part of this segment overlaps with the given range
+        int mid = getMid(ss, se);
+ 
+        Node left = getMaxUtil(ss, mid, qs,qe, 2 * si + 1);
+        Node right = getMaxUtil(mid + 1, se, qs,qe, 2 * si + 2);
+        maxSum.open=left.open+right.open;
+        maxSum.closed=left.closed+right.closed;
+        maxSum.max=left.max+right.max+Math.min(left.open,right.closed);
+        maxSum.open-=maxSum.max;
+        maxSum.closed-=maxSum.closed;
+        return maxSum;
+    }
+ 
+    // Return sum of elements in range from index qs (quey start) to
+    // qe (query end).  It mainly uses getSumUtil()
+    int getSum(int n, int qs, int qe)
+    {
+        // Check for erroneous input values
+        if (qs < 0 || qe > n - 1 || qs > qe) {
+            System.out.println("Invalid Input");
+            return -1;
+        }
+        Node endNode= getMaxUtil(0, n - 1, qs, qe, 0);
+        return endNode.max;
+    }
+ 
+    // A recursive function that constructs Segment Tree for array[ss..se].
+    // si is index of current node in segment tree st
+    Node constructSTUtil(int arr[], int ss, int se, int si)
+    {
+        // If there is one element in array, store it in current node of
+        // segment tree and return
+        if (ss == se) {
+            if(arr[ss]=='(')
+                st[si].open=1;
+            else
+                st[si].closed=1;
+ 
+            st[si].max=0;
+            return st[si];
+        }
+        else {
+            // If there are more than one elements, then recur for left and
+            // right subtrees and store the sum of values in this node
+            int mid = getMid(ss, se);
+            Node left = constructSTUtil(arr, ss, mid, 2 * si + 1);
+            Node right = constructSTUtil(arr, mid + 1, se, 2 * si + 2);
+            st[si].open=left.open+right.open;
+            st[si].closed=left.closed+right.closed;
+            st[si].max=left.max+right.max+Math.min(left.open,right.closed);
+            st[si].open-=st[si].max;
+            st[si].closed-=st[si].max;
+            return st[si];
+        }
+    }
+ 
+    // Driver program to test above functions
+    public static void main(String args[])
+    {
+        int arr[] = {'(','(',')',')',')','(',')','('};
+        int n = arr.length;
+        SegmentTree  tree = new SegmentTree(arr, n);
+ 
+        // Build segment tree from given array
+ 
+        // Print sum of values in array from index 1 to 3
+        System.out.println("Max sub values in given range = " +
+                tree.getSum(n, 1, 3));
+        System.out.println("Max sub values in given range = " +
+                tree.getSum(n, 1, 4));
+        // Update: set arr[1] = 10 and update corresponding segment
+        // tree nodes
+        System.out.println("Max sub values in given range = " +
+                tree.getSum(n, 0, 4));
+        // Find sum after the value is updated
+        System.out.println("Max sub values in given range = " +
+                tree.getSum(n, 0, 5));
+    }
+}
+//BINARY INDEXED TREE
+class BinaryIndexedTree
+{  
+    // Max tree size
+    final static int MAX = 1000;      
+ 
+    static int BITree[] = new int[MAX];
+     
+    /* n --> No. of elements present in input array.  
+    BITree[0..n] --> Array that represents Binary  
+                    Indexed Tree.
+    arr[0..n-1] --> Input array for whic prefix sum  
+                    is evaluated. */
+ 
+    // Returns sum of arr[0..index]. This function  
+    // assumes that the array is preprocessed and  
+    // partial sums of array elements are stored  
+    // in BITree[].
+    int getSum(int index)
+    {
+        int sum = 0; // Iniialize result
+     
+        // index in BITree[] is 1 more than
+        // the index in arr[]
+        index = index + 1;
+     
+        // Traverse ancestors of BITree[index]
+        while(index>0)
+        {
+            // Add current element of BITree  
+            // to sum
+            sum += BITree[index];
+     
+            // Move index to parent node in  
+            // getSum View
+            index -= index & (-index);
+        }
+        return sum;
+    }
+ 
+    // Updates a node in Binary Index Tree (BITree)
+    // at given index in BITree. The given value  
+    // 'val' is added to BITree[i] and all of  
+    // its ancestors in tree.
+    public static void updateBIT(int n, int index,  
+                                        int val)
+    {
+        // index in BITree[] is 1 more than  
+        // the index in arr[]
+        index = index + 1;
+     
+        // Traverse all ancestors and add 'val'
+        while(index <= n)
+        {
+        // Add 'val' to current node of BIT Tree
+        BITree[index] += val;
+     
+        // Update index to that of parent  
+        // in update View
+        index += index & (-index);
+        }
+    }
+ 
+    /* Function to construct fenwick tree  
+    from given array.*/
+    void constructBITree(int arr[], int n)
+    {
+        // Initialize BITree[] as 0
+        for(int i=1; i<=n; i++)
+            BITree[i] = 0;
+     
+        // Store the actual values in BITree[]
+        // using update()
+        for(int i = 0; i < n; i++)
+            updateBIT(n, i, arr[i]);
+    }
+ 
+    // Main function
+    public static void main(String args[])
+    {
+        int freq[] = {2, 1, 1, 3, 2, 3,  
+                    4, 5, 6, 7, 8, 9};
+        int n = freq.length;
+        BinaryIndexedTree tree = new BinaryIndexedTree();
+ 
+        // Build fenwick tree from given array
+        tree.constructBITree(freq, n);
+ 
+        System.out.println("Sum of elements in arr[0..5]"+
+                        " is "+ tree.getSum(5));
+         
+        // Let use test the update operation
+        freq[3] += 6;
+         
+        // Update BIT for above change in arr[]
+        updateBIT(n, 3, 6);  
+ 
+        // Find sum after the value is updated
+        System.out.println("Sum of elements in arr[0..5]"+
+                    " after update is " + tree.getSum(5));
+    }
+}
+//Binary indexed less than
+import java.util.*;
+ 
+//Klasata element ni treba za otkako kje ja sortirame nizata sepak da mozheme da odgovorime na
+//prethodnata bidejki za nea beshe definiran opsegot na indeksi
+class Element implements Comparable<Element>{
+    int index, value;
+    Element(int index,int value){
+        this.index=index;
+        this.value=value;
+    }
+ 
+    @Override
+    public int compareTo(Element o) {
+        return value-o.value;
+    }
+}
+//Query klasa za da mozhe da se sortiraat polesno
+class Query implements Comparable<Query>{
+    int left,right,value;
+    Query(int left,int right,int value){
+        this.left=left;
+        this.right=right;
+        this.value=value;
+    }
+    @Override
+    public int compareTo(Query o) {
+        return value-o.value;
+    }
+}
+ 
+class BinaryIndexed{
+    int[]indexedTree; //reprezentacijata na drvoto preku niza
+    int N;
+    BinaryIndexed(int N){
+        this.N=N;
+        indexedTree= new int[N+1]; // nizata ima N+1 elementi za dummy jazolot
+    }
+ 
+    //funkcija za azuriranje na vrednost kumulativno se do n-tiot jazol
+    void updateValue(int index,int value){
+        for(;index<=N;index+=index&-index)
+            indexedTree[index]+=value;
+    }
+ 
+    //funckija za sproveduvanje na query spored pravilo
+    //na koristenje na indeksirano drvo
+    int lessThanQuery(int index){
+        int count=0;
+        for(;index>0;index-=index&-index)
+            count+=indexedTree[index];
+        return count;
+    }
+ 
+    //funkcija koja gi dostavuva reshenijata za site pobarani queries
+    void solveQueries(List<Element>elements,List<Query>queries){
+        Arrays.fill(indexedTree,0); //resetirame drvo za sekoe nov set na baranja
+        Collections.sort(elements);       //gi sortirame i nizata i kverinjata
+        Collections.sort(queries);
+        int currentIndex = 0; // kje ni go oznacuva indeksot vo drvoto -  jazolot
+        //kaj koj ni prekinal prethodniot query
+ 
+        for (int i = 0; i < queries.size(); i++) {
+ 
+            while(currentIndex<N&&elements.get(currentIndex).value<=queries.get(i).value) // se dodeka
+                //ima pomali elementi ili ne si stignal do kraj od nizata
+            {
+                updateValue(elements.get(currentIndex).index+1,1); //pravi update pocnuvajki od
+                //jazol na currentIndex+1
+                currentIndex++; //odi na sleden jazol
+            }
+ 
+            //tuka vekje znaeme deka sme gi proshle site pomali ili ednakvi elementi, ostanuva da gi
+            //izbroime
+            System.out.println(lessThanQuery(queries.get(i).right+1)
+            -lessThanQuery(queries.get(i).left)) ; //printame rezultat na query-to
+        }
+    }
+}
+

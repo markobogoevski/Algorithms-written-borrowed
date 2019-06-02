@@ -1,0 +1,488 @@
+//GRAPH ADJACENCY LIST
+class Graph {
+    int numberOfVertices;
+    ArrayList<Integer>[] adjacencyList;
+    public Graph(int numberOfVertices){
+        this.numberOfVertices=numberOfVertices;
+        adjacencyList=new ArrayList[numberOfVertices];
+        for(int i=0;i<numberOfVertices;i++)
+            adjacencyList[i]=new ArrayList<>();
+    }
+ 
+    public void addEdge(int x,int y){
+        adjacencyList[x].add(y);
+    }
+   
+    public ArrayList<Integer> getAdjacentVertices(int x){
+        return adjacencyList[x];
+    }
+   
+    public boolean hasEdge(int x,int y){
+        return adjacencyList[x].contains(y);
+    }
+ 
+//BFS
+void bfs(int sourceNode,int numberOfVertices,Graph g) {
+        Queue<Integer> vertices=new LinkedList<>();
+        int[]pred=new int[numberOfVertices];
+        boolean[]visited=new boolean[numberOfVertices];
+        int[]distance=new int[numberOfVertices];
+        for(int i=0;i<distance.length;i++){
+            distance[i]=0;
+            pred[i]=-1;
+        }
+        pred[sourceNode]=-2;
+        distance[sourceNode]=0;
+        vertices.add(sourceNode);
+        while(!vertices.isEmpty()){
+            int vertex=vertices.remove();
+            System.out.println(vertex+" ");
+            for(Integer adjacentVertex:g.adjacent(vertex)){
+                if(!visited[adjacentVertex]){
+                    vertices.add(adjacentVertex);
+                    pred[adjacentVertex]=vertex;
+                    distance[adjacentVertex]++;
+                    visited[adjacentVertex]=true;
+                }
+            }
+        }
+ 
+        //Pred za printanje na pat do dadeno teme..
+        //Distance za rastojanie=br rebra od source do toa teme
+    }
+ 
+//TOPOLOGICAL REC
+    int[] rTopologicalSort(int sourceNode,int numberOfVertices,Graph g){
+        boolean[]visited=new boolean[numberOfVertices];
+        Stack<Integer>topological = new Stack<>();
+        recursiveTopologicalSort(sourceNode,g,topological,visited);
+        int topologicalArray[]=new int[numberOfVertices];
+        int i=0;
+        while(!topological.isEmpty())
+            topologicalArray[i++]=topological.pop();
+ 
+        return topologicalArray;
+    }
+     void recursiveTopologicalSort(int sourceNode,Graph g,Stack<Integer>topological,boolean[]visited){
+        visited[sourceNode]=true;
+        for (Integer adjacentVertex : g.adjacent(sourceNode)) {
+            if (!visited[adjacentVertex]) {
+                recursiveTopologicalSort(adjacentVertex,g,topological,visited);
+            }
+        }
+        topological.push(sourceNode);
+    }
+ 
+//DFS REC
+    void rDFS(int sourceNode,int numberOfVertices,Graph g){
+        boolean[]visited=new boolean[numberOfVertices];
+        recursiveDFS(sourceNode,g,visited);
+    }
+    void recursiveDFS(int sourceNode,Graph g,boolean[]visited){
+        visited[sourceNode]=true;
+        System.out.println(sourceNode+" ");
+        for (Integer adjacentVertex : g.adjacent(sourceNode)) {
+            if (!visited[adjacentVertex]) {
+               recursiveDFS(adjacentVertex,g,visited);
+            }
+        }
+    }
+ 
+//TOPOLOGICAL REGULAR
+    int[] topologicalSort(int sourceNode,int numberOfVertices,Graph g){
+        Stack<Integer> vertices=new Stack<>();
+        Stack<Integer>topological=new Stack<>();
+        boolean[]visited=new boolean[numberOfVertices];
+        visited[sourceNode]=true;
+        vertices.push(sourceNode);
+        while(!vertices.isEmpty()) {
+            int vertex = vertices.pop();
+            if (g.adjacent(vertex).size == 0)
+                topological.push(vertex);
+            else {
+                int count = 0;
+                for (Integer adjacentVertex : g.adjacent(vertex)) {
+                    if (!visited[adjacentVertex]) {
+                        count++;
+                        vertices.push(adjacentVertex);
+                        visited[adjacentVertex] = true;
+                    }
+                }
+                if(count==0)
+                    topological.push(vertex);
+            }
+        }
+        int[]topologicalOrder=new int[numberOfVertices];
+        int i=0;
+            while(!topological.isEmpty())
+                topologicalOrder[i++]=topological.pop();
+ 
+        return topologicalOrder;
+      }
+ 
+//DFS REGULAR
+    void dfs(int sourceNode,int numberOfVertices,Graph g) {
+        Stack<Integer> vertices=new Stack<>();
+        int[]pred=new int[numberOfVertices];
+        boolean[]visited=new boolean[numberOfVertices];
+        int[]distance=new int[numberOfVertices];
+        for(int i=0;i<distance.length;i++){
+            distance[i]=0;
+            pred[i]=-1;
+        }
+        pred[sourceNode]=-2;
+        distance[sourceNode]=0;
+        vertices.push(sourceNode);
+        while(!vertices.isEmpty()){
+            int vertex=vertices.pop();
+            System.out.println(vertex+" ");
+            for(Integer adjacentVertex:g.adjacent(vertex)){
+                if(!visited[adjacentVertex]){
+                    vertices.push(adjacentVertex);
+                    pred[adjacentVertex]=vertex;
+                    distance[adjacentVertex]++;
+                    visited[adjacentVertex]=true;
+                }
+            }
+        }
+ 
+        //Pred za printanje na pat do dadeno teme..
+        //Distance za rastojanie=br rebra od source do toa teme
+    }
+ 
+//CYCLE DETECTION UNDIRECTED
+public boolean cycleDetectionUtil(int sourceVertex,boolean[]visited,int parent){
+        visited[sourceVertex]=true;
+        for(Integer adjacent:getAdjacentVertices(sourceVertex)){
+            if(!visited[adjacent]){
+               if(cycleDetectionUtil(adjacent,visited,sourceVertex))
+                    return true;
+            }
+            else
+                    return parent!=adjacent;  
+        }
+        return false;
+    }
+    public boolean cycleDetection(){
+        boolean visited[]=new boolean[numberOfVertices];
+        for(int i=0;i<numberOfVertices;i++){
+            if(!visited[i]) {
+                if (cycleDetectionUtil(i, visited, -1))
+                    return true;
+            }
+        }
+        return false;
+    }
+ 
+//CYCLE DETECTION DIRECTED
+ 
+public boolean cycleDetection(){
+        boolean[]visited=new boolean[numberOfVertices];
+        boolean[]backEdge=new boolean[numberOfVertices];
+ 
+        for(int i=0;i<numberOfVertices;i++){
+            if(cycleDetectionUtil(i,visited,backEdge))
+                return true;
+        }
+        return false;
+    }
+    public boolean cycleDetectionUtil(int sourceVertex,boolean[]visited,boolean[] backEdge){
+        if(backEdge[sourceVertex])
+            return true;
+        if(visited[sourceVertex])
+            return false;
+ 
+        visited[sourceVertex]=true;
+        backEdge[sourceVertex]=true;
+ 
+        for(Integer adjacent:getAdjacentVertices(sourceVertex)){
+            if(cycleDetectionUtil(adjacent,visited,backEdge))
+                return true;
+        }
+ 
+        backEdge[sourceVertex]=false;
+        return false;
+    }
+ 
+//PATH DETECTION
+ 
+ 
+public boolean isThereAPath(int sourceNode,int endNode){
+        Stack<Integer>vertices=new Stack<>();
+        Stack<Integer>path=new Stack<>();
+        boolean[]visited=new boolean[numberOfVertices];
+        int[]pred=new int[numberOfVertices];
+        for(int i=0;i<numberOfVertices;i++)
+            pred[i]=-1;
+        pred[sourceNode]=-2;
+        visited[sourceNode]=true;
+        vertices.push(sourceNode);
+        while(!vertices.isEmpty()){
+            int vertex=vertices.pop();
+            if(vertex==endNode) {
+                StringBuilder stringBuilder=new StringBuilder();
+                stringBuilder.append("Path: ");
+                int i=endNode;
+                path.push(i);
+                while(i!=-2){
+                    path.push(pred[i]);
+                    i=pred[i];
+                }
+               
+                while(!path.isEmpty())
+                    stringBuilder.append(path.pop()).append(" ");
+ 
+                System.out.println(stringBuilder.toString());
+                return true;
+            }
+            for(Integer adjacent:getAdjacentVertices(vertex)){
+                if(!visited[adjacent]){
+                    visited[adjacent]=true;
+                    vertices.push(adjacent);
+                    pred[adjacent]=vertex;
+                }
+            }
+        }
+        return false;
+    }
+ 
+//BIPARTITE CHECK
+public boolean isBipartiteDFS(){
+        boolean[]visited=new boolean[numberOfVertices];
+        int[]colors=new int[numberOfVertices]; //1 red, -1 blue
+        Stack<Integer>vertices=new Stack<>();
+        visited[0]=true;
+        colors[0]=1;
+        vertices.push(0);
+        while(!vertices.isEmpty()){
+            int vertex=vertices.pop();
+            for(Integer adjacent:getAdjacentVertices(vertex)){
+                if(!visited[adjacent]){
+                    colors[adjacent]=colors[vertex]*-1;
+                    visited[adjacent]=true;
+                    vertices.push(adjacent);
+                }else{
+                    if(colors[adjacent]==colors[vertex])
+                        return false;
+                }
+            }
+        }
+        return true;
+    }
+ 
+//STRONGLY connected GRAPH UNDIRECTED - samo proveri dali so bfs/dfs gi posetuvash site teminja
+//STRONGLY connected GRAPH DIRECTED - mozhe so floyd da vidish, a mozhe i od sekoe teme dfs i da vidish dali gi posetuva site drugi,
+//mozhe i kosaraju algorithm za broj na SCC - pravish DFS na random teme, posle gi reversnuvash site rebra i pak praish dfs od istoto //teme, vrakjash false ako nekoj node ne e stignat
+ 
+//KOSARAJU - printing all SCCs
+ 
+public void fillStack(int sourceNode,Stack<Integer>stack,boolean[]visited){
+        visited[sourceNode]=true;
+        for(Integer adjacent:getAdjacentVertices(sourceNode)){
+            if(!visited[sourceNode])
+                fillStack(adjacent,stack,visited);
+        }
+        stack.push(sourceNode);
+    }
+    public void DFSUtil(int sourceNode,boolean[]visited){
+        System.out.println(sourceNode+" ");
+        visited[sourceNode]=true;
+        for(Integer adjacent:getAdjacentVertices(sourceNode)){
+            if(!visited[sourceNode])
+                DFSUtil(adjacent,stack,visited);
+        }
+    }
+    public Graph transposeGraph(){
+        Graph newGraph=new Graph(numberOfVertices);
+        for(int i=0;i<adjacencyList.length;i++){
+            for(Integer vertex:adjacencyList[i]){
+                newGraph.adjacencyList[vertex].add(i);
+            }
+        }
+        return newGraph;
+    }
+    public void findAllSCCs(){
+        boolean visited[]=new boolean[numberOfVertices];
+        Stack<Integer>helperStack=new Stack<>();
+        for(int i=0;i<numberOfVertices;i++)
+            if(!visited[i])
+                fillStack(i,helperStack,visited);
+           
+        for(int i=0;i<numberOfVertices;i++)
+            visited[i]=false;
+       
+        Graph newGraph=transposeGraph();
+        while(!helperStack.isEmpty()){
+            int vertex=helperStack.pop();
+            if(!visited[vertex])
+            DFSUtil(vertex,visited);
+            System.out.println();
+        }
+    }
+FordFulkerson FOR ADJACENCY MATRIX
+ 
+class Graph {
+    int[][] adjacencyMatrix;
+    int V;
+ 
+    Graph(int[][] adjacencyMatrix) {
+        V = adjacencyMatrix.length;
+        this.adjacencyMatrix = new int[V][V];
+        for (int i = 0; i < V; i++) {
+            for (int j = 0; j < V; j++) {
+                this.adjacencyMatrix[i][j] = adjacencyMatrix[i][j];
+            }
+        }
+    }
+ 
+    public boolean isNeighbour(int vertex1, int vertex2) {
+        return adjacencyMatrix[vertex1][vertex2] > 0;
+    }
+ 
+    public ArrayList<Integer> getNeighbours(int vertex1) {
+        ArrayList<Integer> neighbours = new ArrayList<>();
+        for (int i = 0; i < V; i++) {
+            if (adjacencyMatrix[vertex1][i] >0)
+                neighbours.add(i);
+        }
+        return neighbours;
+    }
+ 
+    public void addEdge(int vertex1, int vertex2) {
+        adjacencyMatrix[vertex1][vertex2] = 1;
+    }
+ 
+    public boolean dfs(int vertex1, int stop, int[] parent) {
+        boolean[] visited = new boolean[V];
+        visited[vertex1] = true;
+        Stack<Integer> fringe = new Stack<>();
+        fringe.push(vertex1);
+        while (!fringe.isEmpty()) {
+            int currVertex = fringe.pop();
+            if (currVertex == stop)
+                return true;
+            for (Integer neighbour : getNeighbours(currVertex)) {
+                if (!visited[neighbour]&&adjacencyMatrix[currVertex][neighbour]>0) {
+                    visited[neighbour] = true;
+                    parent[neighbour] = currVertex;
+                    fringe.push(neighbour);
+                }
+            }
+        }
+        return false;
+    }
+ 
+    public void bfs(int vertex) {
+ 
+        boolean[] visited = new boolean[V];
+        visited[vertex] = true;
+        int[] parent = new int[V];
+        for (int i = 0; i < V; i++) {
+            parent[i] = -1;
+        }
+        parent[vertex] = -2;
+        Queue<Integer> fringe = new LinkedList<>();
+        fringe.add(vertex);
+        while (!fringe.isEmpty()) {
+            int currVertex = fringe.poll();
+            System.out.println(currVertex + " ");
+            for (Integer neighbour : getNeighbours(currVertex)) {
+                if (!visited[neighbour]) {
+                    visited[neighbour] = true;
+                    parent[neighbour] = currVertex;
+                    fringe.add(neighbour);
+                }
+            }
+        }
+    }
+ 
+    public int maxFlow(int source, int sink) {
+        int maxFlow = 0;
+        int[] parent = new int[V];
+        for (int i = 0; i < V; i++) {
+            parent[i] = -1;
+        }
+        int minCapacity;
+ 
+        int[][] newAdjacencyMatrix = new int[V][V];
+        for (int i = 0; i < V; i++) {
+            for (int j = 0; j < V; j++) {
+                newAdjacencyMatrix[i][j] = adjacencyMatrix[i][j];
+            }
+        }
+        Graph newGraph=new Graph(newAdjacencyMatrix);
+ 
+ 
+        while (true) {
+            if (newGraph.dfs(source, sink, parent)) {
+                int second = sink;
+                int first = parent[sink];
+                minCapacity = Integer.MAX_VALUE;
+                while (first != source) {
+                    if (newGraph.adjacencyMatrix[first][second] < minCapacity) {
+                        minCapacity = newGraph.adjacencyMatrix[first][second];
+                    }
+                    second = first;
+                    first = parent[first];
+                }
+                maxFlow+=minCapacity;
+                second = sink;
+                first = parent[sink];
+                while (first != source) {
+                    newGraph.adjacencyMatrix[second][first]=newGraph.adjacencyMatrix[first][second];
+                    newGraph.adjacencyMatrix[first][second]-=minCapacity;
+                    second = first;
+                    first = parent[first];
+                }
+ 
+            } else
+                break;
+        }
+        return maxFlow;
+    }
+}
+ 
+CIRCULATION VERTEX LIMIT
+public static void main(String[] args) {
+        List<Integer>vertices=new ArrayList<>();
+        List<Integer>capacities=new ArrayList<>();
+ 
+        Scanner scanner=new Scanner(System.in);
+ 
+        int N=scanner.nextInt();
+        int[][]adjacencyMatrix=new int[N+vertices.size()][N+vertices.size()];
+        for (int i = 0; i < N; i++) {
+            vertices.add(scanner.nextInt());
+            capacities.add(Math.abs(scanner.nextInt()));
+        }
+ 
+        int K=scanner.nextInt();
+        for (int i = 0; i < K; i++) {
+            int vertex1=scanner.nextInt();
+            int vertex2=scanner.nextInt();
+            adjacencyMatrix[vertex1][vertex2]=scanner.nextInt();
+        }
+        int source = scanner.nextInt();
+        int sink = scanner.nextInt();
+ 
+        int start=N;
+        int k=0;
+        int newSink=0;
+        for(Integer vertex:vertices){
+            if(vertex==sink)
+                newSink=start+k;
+           
+            for(int i=0;i<N;i++){
+                adjacencyMatrix[start+k][i]=adjacencyMatrix[vertex][i];
+            }
+            for (int i = 0; i < N; i++) {
+                adjacencyMatrix[vertex][i]=0;
+            }
+ 
+            adjacencyMatrix[vertex][start+k]=capacities.get(k);
+            k++;
+        }
+        sink=newSink;
+        Graph graph1=new Graph(adjacencyMatrix);
+        System.out.println(graph1.maxFlow(source,sink));
+    }
